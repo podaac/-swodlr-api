@@ -11,6 +11,15 @@ type Mutation {
         mgrsBandAdjust: Int
     ): L2RasterProduct!
 
+    generateL2RasterProductByConceptId(
+        conceptId: ID!,
+        outputGranuleExtentFlag: Boolean!,
+        outputSamplingGridType: GridType!,
+        rasterResolution: Int!,
+        utmZoneAdjust: Int,
+        mgrsBandAdjust: Int
+    ): L2RasterProduct!
+
     # -- Raster Definitions --
     deleteRasterDefinition(id: ID!): Boolean!
     createRasterDefinition(
