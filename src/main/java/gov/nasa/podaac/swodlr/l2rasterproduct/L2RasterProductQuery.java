@@ -22,4 +22,17 @@ public interface L2RasterProductQuery {
       UUID after,
       int limit
   );
+
+  List<L2RasterProduct> findByParameters(
+      Integer cycle,
+      Integer pass,
+      Integer scene,
+      Boolean outputGranuleExtentFlag,
+      GridType outputSamplingGridType,
+      Integer rasterResolution,
+      Integer utmZoneAdjust,
+      Integer mgrsBandAdjust,
+      UUID after,
+      int limit
+  );
 }

@@ -7,6 +7,7 @@ import gov.nasa.podaac.swodlr.status.Status;
 import gov.nasa.podaac.swodlr.status.StatusRepository;
 import gov.nasa.podaac.swodlr.user.User;
 import gov.nasa.podaac.swodlr.user.UserReference;
+import gov.nasa.podaac.swodlr.user.UserRepository;
 import java.time.DateTimeException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
@@ -94,6 +95,36 @@ public class L2RasterProductController {
     statusRepository.save(invalidatedStatus);
 
     return product;
+  }
+
+  @PreAuthorize("hasRole(\"ROLE_Administrator\")")
+  @QueryMapping
+  public List<L2RasterProduct> l2RasterProducts(
+      @Argument Integer cycle,
+      @Argument Integer pass,
+      @Argument Integer scene,
+      @Argument Boolean outputGranuleExtentFlag,
+      @Argument GridType outputSamplingGridType,
+      @Argument Integer rasterResolution,
+      @Argument Integer utmZoneAdjust,
+      @Argument Integer mgrsBandAdjust,
+      @Argument UUID after,
+      @Argument int limit
+  ) {
+    List<L2RasterProduct> products = l2RasterProductRepository.findByParameters(
+      cycle,
+      pass,
+      scene,
+      outputGranuleExtentFlag,
+      outputSamplingGridType,
+      rasterResolution,
+      utmZoneAdjust,
+      mgrsBandAdjust,
+      after,
+      limit
+    );
+
+    return products;
   }
 
   @QueryMapping

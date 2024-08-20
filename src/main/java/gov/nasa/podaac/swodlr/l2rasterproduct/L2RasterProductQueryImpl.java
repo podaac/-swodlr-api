@@ -75,8 +75,8 @@ public class L2RasterProductQueryImpl implements L2RasterProductQuery {
           (:rasterResolution is NULL OR \"rasterResolution\" = :rasterResolution) AND
           (:utmZoneAdjust is NULL OR \"utmZoneAdjust\" = :utmZoneAdjust) AND
           (:mgrsBandAdjust is NULL OR \"mgrsBandAdjust\" = :mgrsBandAdjust) AND
-          (CAST(:beforeTimestamp as TIMESTAMP) is NULL OR \"L2RasterProducts\".timestamp <= :beforeTimestamp) AND
-          (CAST(:afterTimestamp as TIMESTAMP) is NULL OR \"L2RasterProducts\".timestamp >= :afterTimestamp) AND
+          (CAST(:beforeTimestamp as TIMESTAMP) is NULL OR \"ProductHistory\".timestamp <= :beforeTimestamp) AND
+          (CAST(:afterTimestamp as TIMESTAMP) is NULL OR \"ProductHistory\".timestamp >= :afterTimestamp) AND
           (\"ProductHistory\".\"requestedById\" = CAST(:userId as UUID)) AND
           (
             (:after is NULL)
@@ -100,6 +100,53 @@ public class L2RasterProductQueryImpl implements L2RasterProductQuery {
     query.setParameter("mgrsBandAdjust", mgrsBandAdjust, IntegerType.INSTANCE);
     query.setParameter("beforeTimestamp", beforeTimestamp, LocalDateTimeType.INSTANCE);
     query.setParameter("afterTimestamp", afterTimestamp, LocalDateTimeType.INSTANCE);
+    query.setParameter("after", after, UUIDCharType.INSTANCE);
+    query.setParameter("limit", limit, IntegerType.INSTANCE);
+
+    return query.getResultList();
+  }
+
+  @Override
+  public List<L2RasterProduct> findByParameters(
+      Integer cycle,
+      Integer pass,
+      Integer scene,
+      Boolean outputGranuleExtentFlag,
+      GridType outputSamplingGridType,
+      Integer rasterResolution,
+      Integer utmZoneAdjust,
+      Integer mgrsBandAdjust,
+      UUID after,
+      int limit
+    ) {
+      @SuppressWarnings("LineLength")
+      String statement =
+        """
+        SELECT \"L2RasterProducts\".* FROM \"L2RasterProducts\"
+        WHERE
+          (:cycle is NULL OR \"cycle\" = :cycle) AND
+          (:pass is NULL OR \"pass\" = :pass) AND
+          (:scene is NULL OR \"scene\" = :scene) AND
+          (:outputGranuleExtentFlag is NULL OR \"outputGranuleExtentFlag\" = :outputGranuleExtentFlag) AND
+          (:outputSamplingGridType is NULL OR \"outputSamplingGridType\" = :outputSamplingGridType) AND
+          (:rasterResolution is NULL OR \"rasterResolution\" = :rasterResolution) AND
+          (:utmZoneAdjust is NULL OR \"utmZoneAdjust\" = :utmZoneAdjust) AND
+          (:mgrsBandAdjust is NULL OR \"mgrsBandAdjust\" = :mgrsBandAdjust) AND
+          (:after is NULL OR \"id\" > CAST(:after as UUID))
+          ORDER BY id DESC LIMIT :limit
+        """;
+
+    Session session = entityManager.unwrap(Session.class);
+    Query<L2RasterProduct> query = session.createNativeQuery(statement, L2RasterProduct.class);
+    query.setParameter("cycle", cycle, IntegerType.INSTANCE);
+    query.setParameter("pass", pass, IntegerType.INSTANCE);
+    query.setParameter("scene", scene, IntegerType.INSTANCE);
+    query.setParameter("outputGranuleExtentFlag", outputGranuleExtentFlag, BooleanType.INSTANCE);
+    query.setParameter("outputSamplingGridType", outputSamplingGridType != null
+        ? outputSamplingGridType.toString() : null, StringType.INSTANCE);
+    query.setParameter("rasterResolution", rasterResolution, IntegerType.INSTANCE);
+    query.setParameter("utmZoneAdjust", utmZoneAdjust, IntegerType.INSTANCE);
+    query.setParameter("mgrsBandAdjust", mgrsBandAdjust, IntegerType.INSTANCE);
     query.setParameter("after", after, UUIDCharType.INSTANCE);
     query.setParameter("limit", limit, IntegerType.INSTANCE);
 

@@ -4,4 +4,22 @@ type Query {
     statusByProduct(product: ID!, limit: Int = 10): [Status!]
     statusByPrevious(after: ID!, limit: Int = 10): [Status!]
     availableScene(cycle: Int!, pass: Int!, scene: Int!): Boolean!
+
+    # -- Admin --
+    user(username: String!): User
+
+    l2RasterProducts(
+        cycle: Int,
+        pass: Int,
+        scene: Int,
+        outputGranuleExtentFlag: Boolean,
+        outputSamplingGridType: GridType,
+        rasterResolution: Int,
+        utmZoneAdjust: Int,
+        mgrsBandAdjust: Int,
+
+        # Pagination
+        after: ID,
+        limit: Int = 10
+    ): [L2RasterProduct!]!
 }
