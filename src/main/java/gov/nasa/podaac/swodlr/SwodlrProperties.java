@@ -9,5 +9,7 @@ import org.springframework.boot.context.properties.ConstructorBinding;
 public record SwodlrProperties(
     Map<String, String> teaMapping,
     String productCreateQueueUrl,
-    String availableTilesTableName
+    String availableTilesTableName,
+    String cmrGraphqlEndpoint,
+    String rasterCollectionConceptId
 ) { }

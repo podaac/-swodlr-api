@@ -1,6 +1,7 @@
 package gov.nasa.podaac.swodlr.l2rasterproduct;
 
 import gov.nasa.podaac.swodlr.exception.SwodlrException;
+import gov.nasa.podaac.swodlr.l2rasterproduct.cmr.CmrSearchService;
 import gov.nasa.podaac.swodlr.rasterdefinition.GridType;
 import gov.nasa.podaac.swodlr.status.State;
 import gov.nasa.podaac.swodlr.status.Status;
@@ -30,6 +31,9 @@ import reactor.core.publisher.Mono;
 @Controller
 public class L2RasterProductController {
   private Logger logger = LoggerFactory.getLogger(getClass());
+
+  @Autowired
+  private CmrSearchService cmrSearchService;
 
   @Autowired
   private L2RasterProductService l2RasterProductService;
@@ -77,6 +81,51 @@ public class L2RasterProductController {
           utmZoneAdjust,
           mgrsBandAdjust
         )));
+    });
+  }
+
+  @MutationMapping
+  public Mono<L2RasterProduct> generateL2RasterProductByConceptId(
+      @ContextValue UserReference userRef,
+      @Argument String conceptId,
+      @Argument boolean outputGranuleExtentFlag,
+      @Argument @NotNull GridType outputSamplingGridType,
+      @Argument int rasterResolution,
+      @Argument Integer utmZoneAdjust,
+      @Argument Integer mgrsBandAdjust
+  ) {
+    return Mono.defer(() -> {
+      User user = userRef.fetch();
+
+      return cmrSearchService
+        .findL2RasterProductById(conceptId)
+        .flatMap((result) -> {
+          return l2RasterProductService
+            .getL2RasterProduct(
+              user,
+              result.cycle(),
+              result.pass(),
+              result.scene(),
+              outputGranuleExtentFlag,
+              outputSamplingGridType,
+              rasterResolution,
+              utmZoneAdjust,
+              mgrsBandAdjust
+            )
+            .switchIfEmpty(
+              Mono.defer(() -> l2RasterProductService.createL2RasterProduct(
+                user,
+                result.cycle(),
+                result.pass(),
+                result.scene(),
+                outputGranuleExtentFlag,
+                outputSamplingGridType,
+                rasterResolution,
+                utmZoneAdjust,
+                mgrsBandAdjust
+              ))
+            );
+        });
     });
   }
 
